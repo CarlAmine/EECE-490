@@ -347,4 +347,4 @@ st.markdown("""
         Let's create delicious memories together!
     </p>
 </footer>
-""", unsafe_allow_html=True)html=True)
+""", unsafe_allow_html=True)
