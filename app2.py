@@ -162,14 +162,8 @@ custom_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Patrick+Hand&display=swap');
 
-stApp {
-    background: 
-        linear-gradient(135deg, rgba(255,243,224,0.9) 0%, rgba(255,228,225,0.9) 100%),
-        url('https://www.transparenttextures.com/patterns/food.png');
-    background-attachment: fixed;
-    min-height: 100vh;
-}
-h1 {
+.stApp { background: red !important; }
+.h1 {
     color: #FF6B6B;
     font-family: 'Comic Neue', cursive;
     text-shadow: 2px 2px #FFD700;
