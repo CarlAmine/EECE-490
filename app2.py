@@ -162,7 +162,39 @@ custom_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Patrick+Hand&display=swap');
 
-.stApp { background: red !important; }
+.stApp {
+    background: 
+        linear-gradient(135deg, rgba(255,243,224,0.95) 0%, rgba(255,228,225,0.95) 100%),
+        url('https://www.transparenttextures.com/patterns/food.png');
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    background-position: center !important;
+}
+
+/* Add floating food animation */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0px); }
+}
+
+.floating-icon {
+    position: fixed;
+    animation: float 3s ease-in-out infinite;
+    opacity: 0.1;
+    z-index: -1;
+}
+
+/* Position floating foods */
+.floating-icon:nth-child(1) { left: 10%; top: 20%; }
+.floating-icon:nth-child(2) { left: 30%; top: 60%; }
+.floating-icon:nth-child(3) { right: 15%; top: 40%; }
+</style>
+
+<!-- Floating food icons -->
+<div class="floating-icon">🥑</div>
+<div class="floating-icon">🍳</div>
+<div class="floating-icon">🥕</div>
 .h1 {
     color: #FF6B6B;
     font-family: 'Comic Neue', cursive;
