@@ -124,13 +124,14 @@
 #         <p>&copy; 2025 NourishWise. All rights reserved.</p>
 #     </footer>
 # """, unsafe_allow_html=True)
+
 import streamlit as st
 import joblib
 import numpy as np
 import requests
 import os
 
-# --- Model Download & Loading ---
+# --- Model Loading (Same as Before) ---
 def download_file_from_google_drive(file_id, destination):
     if not os.path.exists(destination):
         URL = f'https://drive.google.com/uc?id={file_id}'
@@ -150,216 +151,210 @@ vectorizer = model_data["vectorizer"]
 label_encoder = model_data["label_encoder"]
 
 # --- Page Configuration ---
-st.set_page_config(page_title="NourishWise", page_icon="👩🍳", layout="wide")
+st.set_page_config(page_title="Recipe Roadster", page_icon="🍔", layout="wide")
 
 # --- Custom CSS ---
 custom_css = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Patrick+Hand&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rock+Salt&display=swap');
 
 :root {
-    --main-color: #FF6B6B;
-    --secondary-color: #FFD700;
-    --background: #FFF9F0;
+    --primary-red: #FF0000;
+    --neon-pink: #FF10F0;
+    --retro-yellow: #FFD700;
+    --dark-bg: #0D0D0D;
 }
 
 body {
-    background: var(--background);
+    background-color: var(--dark-bg);
+    color: white;
 }
 
-h1 {
-    color: var(--main-color);
-    font-family: 'Comic Neue', cursive;
-    text-shadow: 2px 2px var(--secondary-color);
+/* Retro Header */
+.header {
+    background: linear-gradient(180deg, #2F0B07 0%, #0D0D0D 100%);
+    border-bottom: 3px solid var(--primary-red);
+    padding: 1rem 0;
     text-align: center;
-    font-size: 3.5rem !important;
 }
 
-.main-container {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+.title {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 4rem;
+    color: var(--retro-yellow);
+    text-shadow: 2px 2px var(--primary-red);
+    letter-spacing: 3px;
+}
+
+/* Navigation Menu */
+.nav-menu {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
     margin: 1rem 0;
 }
 
-.sidebar-container {
-    background: #FFF3E0 !important;
-    border-radius: 15px !important;
-    border: 3px solid #FFD1A4 !important;
-    padding: 1.5rem !important;
+.nav-item {
+    font-family: 'Rock Salt', cursive;
+    color: var(--neon-pink) !important;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-.stTextArea textarea {
-    border-radius: 10px !important;
-    border: 2px solid #FFB347 !important;
-    font-family: 'Patrick Hand', cursive !important;
-    font-size: 1.2rem !important;
+.nav-item:hover {
+    color: var(--retro-yellow) !important;
+    transform: scale(1.1);
 }
 
-.stButton > button {
-    background: var(--main-color);
-    font-family: 'Comic Neue', cursive;
-    font-size: 1.5rem !important;
-    border-radius: 15px !important;
-    padding: 12px 30px !important;
-    transition: transform 0.2s;
-    width: 100%;
-}
-
+/* Recipe Card */
 .recipe-card {
-    background: #FFF8E1;
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin: 1rem 0;
-    border: 2px dashed #FFB347;
+    background: #1A1A1A;
+    border: 2px solid var(--primary-red);
+    border-radius: 10px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 0 15px rgba(255,0,0,0.3);
 }
 
-.fun-fact {
-    background: #E3F2FD;
-    border-left: 5px solid #64B5F6;
-    padding: 1rem;
-    margin: 1rem 0;
-    border-radius: 8px;
+/* Form Elements */
+.stTextInput>div>div>input, .stTextArea>div>div>textarea {
+    background: #2A2A2A !important;
+    color: white !important;
+    border: 1px solid var(--primary-red) !important;
+    border-radius: 5px !important;
 }
 
-.cooking-tip {
-    background: #FFEBEE;
-    border-radius: 15px;
-    padding: 1.5rem;
-    margin: 1rem 0;
+.stButton>button {
+    background: var(--primary-red) !important;
+    color: white !important;
+    font-family: 'Bebas Neue', cursive !important;
+    font-size: 1.5rem !important;
+    border-radius: 5px !important;
+    border: none !important;
+    padding: 0.5rem 2rem !important;
+    transition: 0.3s !important;
 }
 
-footer {
-    background: #FFE0B2;
-    padding: 1.5rem;
-    border-radius: 15px;
-    margin-top: 2rem;
-    text-align: center;
+.stButton>button:hover {
+    background: var(--retro-yellow) !important;
+    color: var(--dark-bg) !important;
+    transform: scale(1.05);
+}
+
+/* Gallery Section */
+.gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.gallery-item {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: 0.3s;
+}
+
+.gallery-item:hover {
+    transform: scale(1.05);
 }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
 
 # --- Header Section ---
-st.markdown("<h1>👨👩👧👦 Family Recipe Finder</h1>", unsafe_allow_html=True)
 st.markdown("""
-<div style='text-align: center; margin-bottom: 2rem;'>
-    <p style='font-family: "Patrick Hand", cursive; font-size: 1.4rem; color: #666;'>
-        Turn your kitchen ingredients into fun family meals! 🍳🌈
-    </p>
+<div class="header">
+    <div class="title">RECIPE ROADSTER</div>
+    <div class="nav-menu">
+        <span class="nav-item">🍔 HOME</span>
+        <span class="nav-item">📜 MENU</span>
+        <span class="nav-item">📸 GALLERY</span>
+        <span class="nav-item">📞 CONTACT</span>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Sidebar Input ---
+# --- Main Content ---
 with st.sidebar:
     st.markdown("""
-    <div class='sidebar-container'>
-        <h2 style='color: #FF6B6B;'>🧺 Your Ingredients</h2>
-        <p style='font-family: "Patrick Hand";'>What's in your kitchen today?</p>
+    <div style="border-left: 3px solid var(--primary-red); padding: 1rem;">
+        <h2 style="color: var(--neon-pink); font-family: 'Bebas Neue';">YOUR INGREDIENTS</h2>
+        <p style="color: var(--retro-yellow);">What's in your kitchen?</p>
     """, unsafe_allow_html=True)
-    
     ingredients = st.text_area(
         "Enter ingredients (comma-separated):",
         height=150,
-        placeholder="e.g.: eggs, milk, flour...",
+        placeholder="e.g.: beef, cheese, tomatoes...",
         label_visibility="collapsed"
     )
-    
-    st.markdown("""
-        <div style='margin-top: 1.5rem; font-family: "Patrick Hand";'>
-        <p>🎉 Pro tips:</p>
-        <ul>
-            <li>Try 3-5 ingredients</li>
-            <li>Be specific (e.g., 'chicken' vs 'meat')</li>
-            <li>Have fun experimenting!</li>
-        </ul>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-# --- Main Content ---
-col1, col2 = st.columns([3, 1])
-
-with col1:
-    with st.container():
-        st.markdown("<div class='main-container'>", unsafe_allow_html=True)
-        st.markdown("### 🍽️ Today's Featured Recipe")
-        st.image("https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-                 use_container_width=True)
-        st.markdown("""
-        <div class='cooking-tip'>
-            <h4 style='color: #FF6B6B;'>👩🍳 Chef's Special: Rainbow Wraps</h4>
-            <p>Perfect for getting kids to eat veggies! Let them choose their colors!</p>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-
-with col2:
-    st.markdown("<div class='main-container'>", unsafe_allow_html=True)
-    st.markdown("### 📚 Cooking School")
-    st.markdown("""
-    <div class='fun-fact'>
-        <h4>🥄 Did You Know?</h4>
-        <p>Mixing ingredients by hand helps kids develop fine motor skills!</p>
-    </div>
-    """, unsafe_allow_html=True)
-    st.image("https://images.unsplash.com/photo-1589984662646-e7b2e4962fce?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
-             use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
 
 # --- Prediction Section ---
-if st.button("✨ Let's Create Magic!", use_container_width=True):
-    if not ingredients.strip():
-        st.error("⛔ Oops! We need some ingredients to work our magic!")
-    else:
-        try:
-            X_input = vectorizer.transform([ingredients]).toarray()
-            y_pred = model.predict(X_input)
-            recipe_index = np.argmax(y_pred, axis=1)
-            predicted_recipe = label_encoder.inverse_transform(recipe_index)
-            
-            st.markdown(f"""
-            <div class='recipe-card'>
-                <h3 style='color: #FF6B6B;'>🎉 Ta-da! We Recommend...</h3>
-                <div style='font-size: 2.5rem; text-align: center; margin: 1rem 0;'>🧁</div>
-                <h2 style='text-align: center;'>{predicted_recipe[0]}</h2>
+col1, col2 = st.columns([2, 1])
+with col1:
+    if st.button("🚀 CREATE RECIPE!"):
+        if not ingredients.strip():
+            st.error("⚠️ Please enter some ingredients!")
+        else:
+            try:
+                X_input = vectorizer.transform([ingredients]).toarray()
+                y_pred = model.predict(X_input)
+                recipe_index = np.argmax(y_pred, axis=1)
+                predicted_recipe = label_encoder.inverse_transform(recipe_index)
                 
-                <div class='fun-fact' style='margin-top: 1.5rem;'>
-                    <h4>👨👩👧👦 Family Challenge:</h4>
-                    <p>Make it a team effort! Assign roles:<br>
-                    - Little chefs: Mixing & decorating<br>
-                    - Big chefs: Measuring & cooking</p>
+                st.markdown(f"""
+                <div class="recipe-card">
+                    <h2 style="color: var(--retro-yellow); font-family: 'Bebas Neue';">🍳 TODAY'S SPECIAL</h2>
+                    <div style="font-size: 2.5rem; text-align: center; margin: 1rem 0;">👩🍳</div>
+                    <h1 style="text-align: center; color: var(--neon-pink);">{predicted_recipe[0]}</h1>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <span style="color: var(--primary-red);">➤</span> 
+                        <span style="color: var(--retro-yellow);">Full recipe available in our cookbook!</span>
+                    </div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.balloons()
-            
-            # Additional Recipe Suggestions
-            st.markdown("""
-            <div class='main-container' style='margin-top: 2rem;'>
-                <h3>🍴 More Fun Ideas</h3>
-                <div class='cooking-tip'>
-                    <p>Try these variations with your ingredients:</p>
-                    <ul>
-                        <li>Make it colorful - add food coloring!</li>
-                        <li>Create fun shapes with cookie cutters</li>
-                        <li>Host a mini cooking competition</li>
-                    </ul>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-        except Exception as e:
-            st.error(f"❌ Oh no! Our recipe book got messy! Please try again.")
+                """, unsafe_allow_html=True)
+                st.balloons()
+            except Exception as e:
+                st.error(f"🔥 Error: {str(e)}")
 
-# --- Footer ---
+with col2:
+    st.markdown("""
+    <div style="background: #1A1A1A; padding: 1.5rem; border-radius: 10px; border: 2px solid var(--primary-red);">
+        <h3 style="color: var(--neon-pink); font-family: 'Bebas Neue';">DAILY SPECIAL</h3>
+        <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+             style="width: 100%; border-radius: 10px; margin: 1rem 0;">
+        <p style="color: var(--retro-yellow);">Classic Beef Burger with Secret Sauce</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# --- Gallery Section ---
 st.markdown("""
-<footer>
-    <p style='font-family: "Comic Neue"; font-size: 1.1rem; color: #666;'>
-        🍳 Made with love by Family Kitchen Friends 🍪<br>
-        Let's create delicious memories together!
-    </p>
-</footer>
+<div class="gallery">
+    <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+             style="width: 100%; height: 200px; object-fit: cover;">
+    </div>
+    <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+             style="width: 100%; height: 200px; object-fit: cover;">
+    </div>
+    <div class="gallery-item">
+        <img src="https://images.unsplash.com/photo-1482049016688-2d3e1b311543?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+             style="width: 100%; height: 200px; object-fit: cover;">
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# --- Contact Section ---
+st.markdown("""
+<div style="background: #1A1A1A; padding: 2rem; border-radius: 10px; margin-top: 2rem; border: 2px solid var(--primary-red);">
+    <h2 style="color: var(--neon-pink); font-family: 'Bebas Neue';">📞 CONTACT THE CHEF</h2>
+    <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+        <input type="text" placeholder="Name" style="padding: 0.5rem; background: #2A2A2A; border: 1px solid var(--primary-red); color: white; border-radius: 5px;">
+        <input type="email" placeholder="Email" style="padding: 0.5rem; background: #2A2A2A; border: 1px solid var(--primary-red); color: white; border-radius: 5px;">
+        <textarea placeholder="Message" style="padding: 0.5rem; background: #2A2A2A; border: 1px solid var(--primary-red); color: white; border-radius: 5px; height: 100px;"></textarea>
+        <button style="background: var(--primary-red); color: white; padding: 0.5rem 2rem; border: none; border-radius: 5px; cursor: pointer;">SEND MESSAGE</button>
+    </div>
+</div>
 """, unsafe_allow_html=True)
