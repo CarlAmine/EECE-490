@@ -162,14 +162,13 @@ custom_css = """
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Patrick+Hand&display=swap');
 
-body {
-    background-image: url('https://www.georgeinstitute.org/sites/default/files/2020-10/world-food-day-2020.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+stApp {
+    background: 
+        linear-gradient(135deg, rgba(255,243,224,0.9) 0%, rgba(255,228,225,0.9) 100%),
+        url('https://www.transparenttextures.com/patterns/food.png');
     background-attachment: fixed;
+    min-height: 100vh;
 }
-
 h1 {
     color: #FF6B6B;
     font-family: 'Comic Neue', cursive;
