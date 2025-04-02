@@ -189,7 +189,7 @@ custom_css = """
 .floating-icon:nth-child(1) { left: 10%; top: 20%; }
 .floating-icon:nth-child(2) { left: 30%; top: 60%; }
 .floating-icon:nth-child(3) { right: 15%; top: 40%; }
-</style>
+
 
 <!-- Floating food icons -->
 <div class="floating-icon">🥑</div>
