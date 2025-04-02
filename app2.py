@@ -94,11 +94,11 @@ with st.sidebar:
 # Main Content Area
 col1, col2 = st.columns([3, 1])
 with col1:
-    st.image("recipe1.jpg", use_column_width=True)  # Ensure the image file is in your app directory
+    st.image("recipe1.jpg", use_container_width=True)  # Updated parameter
 
 with col2:
     st.markdown("<h3 style='text-align: center; color: #FF4B4B;'>Featured Recipe</h3>", unsafe_allow_html=True)
-    st.image("https://images.unsplash.com/photo-1543353071-873f17a7a088?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=60", use_column_width=True)
+    st.image("https://images.unsplash.com/photo-1543353071-873f17a7a088?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=60", use_container_width=True)
     
 st.markdown("---")
 
