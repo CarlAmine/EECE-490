@@ -163,8 +163,15 @@ custom_css = """
 @import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Patrick+Hand&display=swap');
 
 body {
-    background: linear-gradient(135deg, #FFF3E0 0%, #FFE4E1 100%);
-    background-attachment: fixed;
+    background: linear-gradient(-45deg, #ffd6d6, #fff3e0, #d6ffd6, #e0f7ff);
+background-size: 400% 400%;
+animation: gradient 15s ease infinite;
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
 }
 
 h1 {
