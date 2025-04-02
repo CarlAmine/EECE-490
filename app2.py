@@ -164,11 +164,10 @@ custom_css = """
 
 .stApp {
     background: 
-        linear-gradient(135deg, rgba(255,243,224,0.95) 0%, rgba(255,228,225,0.95) 100%),
+        linear-gradient(135deg, rgba(255,243,224,0.9) 0%, rgba(255,228,225,0.9) 100%),
         url('https://www.transparenttextures.com/patterns/food.png');
-    background-attachment: fixed !important;
-    background-size: cover !important;
-    background-position: center !important;
+    background-attachment: fixed;
+    min-height: 100vh;!important
 }
 
 /* Add floating food animation */
