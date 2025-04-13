@@ -6,4 +6,4 @@ pandas
 joblib
 requests
 gdown
-streamli_lottie
+streamlit_lottie
