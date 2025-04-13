@@ -1,142 +1,30 @@
-# import streamlit as st
-# import joblib
-# import numpy as np
-# import requests
-# import os
-
-# # --- Download the model file from Google Drive if not already present ---
-# def download_file_from_google_drive(file_id, destination):
-#     if not os.path.exists(destination):  # Only download if the file doesn't exist
-#         URL = f'https://drive.google.com/uc?id={file_id}'
-#         session = requests.Session()
-#         response = session.get(URL, stream=True)
-        
-#         if 'Content-Disposition' in response.headers:
-#             with open(destination, 'wb') as f:
-#                 for chunk in response.iter_content(32768):
-#                     f.write(chunk)
-
-# file_id = '1tR6_8S-yISRKZR2QJ6BjU3A3V5HHUCm7'
-# download_file_from_google_drive(file_id, 'recipe_model.pkl')
-
-# # --- Load Model and Preprocessors from a Single File ---
-# model_data = joblib.load("recipe_model.pkl")
-# model = model_data["model"]            # TensorFlow/Keras model
-# vectorizer = model_data["vectorizer"]  # TF-IDF Vectorizer
-# label_encoder = model_data["label_encoder"]  # Label Encoder
-
-# # --- Configure Page ---
-# st.set_page_config(page_title="NourishWise", page_icon="🍽️", layout="wide")
-
-# # --- Custom CSS ---
-# custom_css = """
-# <style>
-# /* Set background gradient */
-# body {
-#     background: linear-gradient(135deg, #FDEFF9, #FFF0F3);
-# }
-
-# /* Header styling */
-# h1 {
-#     color: #FF4B4B;
-#     text-align: center;
-#     font-family: 'Roboto', sans-serif;
-#     font-weight: 700;
-# }
-
-# /* General text styling */
-# body, .css-1d391kg, .css-1aumxhk {
-#     font-family: 'Roboto', sans-serif;
-# }
-
-# /* Sidebar styling */
-# .css-1d391kg {
-#     background-color: #fff;
-#     border-right: 1px solid #e6e6e6;
-# }
-
-# /* Button styling */
-# .stButton > button {
-#     background-color: #FF4B4B;
-#     color: white;
-#     font-size: 18px;
-#     padding: 10px 20px;
-#     border-radius: 8px;
-#     border: none;
-#     transition: background-color 0.3s ease;
-# }
-# .stButton > button:hover {
-#     background-color: #E63946;
-# }
-
-# /* Footer styling */
-# footer {
-#     text-align: center;
-#     padding: 10px;
-#     color: #666;
-#     font-size: 14px;
-# }
-# </style>
-# """
-# st.markdown(custom_css, unsafe_allow_html=True)
-
-# # --- App Header ---
-# st.markdown("<h1>🍽️ NourishWise: AI-Powered Recipe Predictor</h1>", unsafe_allow_html=True)
-# st.markdown("<p style='text-align: center; font-size: 18px; color: #555;'>Discover delicious recipes based on your ingredients.</p>", unsafe_allow_html=True)
-
-# # --- Layout: Use Sidebar for Ingredients ---
-# with st.sidebar:
-#     st.header("Input Ingredients")
-#     ingredients = st.text_area("📝 Enter Ingredients (comma-separated):", height=150)
-#     st.markdown("---")
-#     st.info("Please enter your available ingredients to receive a recipe recommendation.")
-
-# # Main Content Area
-# col1, col2 = st.columns([3, 1])
-# with col1:
-#     st.image("recipe1.jpg", use_container_width=True)  # Updated parameter
-
-# with col2:
-#     st.markdown("<h3 style='text-align: center; color: #FF4B4B;'>Featured Recipe</h3>", unsafe_allow_html=True)
-#     st.image("https://images.unsplash.com/photo-1543353071-873f17a7a088?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=60", use_container_width=True)
-    
-# st.markdown("---")
-
-# # --- Prediction Logic ---
-# if st.button("🔮 Predict Recipe"):
-#     if not ingredients.strip():
-#         st.error("⚠️ Please enter some ingredients in the sidebar.")
-#     else:
-#         try:
-#             X_input = vectorizer.transform([ingredients]).toarray()
-#             y_pred = model.predict(X_input)
-#             recipe_index = np.argmax(y_pred, axis=1)
-#             predicted_recipe = label_encoder.inverse_transform(recipe_index)
-            
-#             st.success(f"✅ Recommended Recipe: **{predicted_recipe[0]}**")
-#             st.balloons()  # Fun visual effect!
-#         except Exception as e:
-#             st.error(f"❌ Error: {str(e)}")
-
-# # --- Custom Footer ---
-# st.markdown("""
-#     <footer>
-#         <p>&copy; 2025 NourishWise. All rights reserved.</p>
-#     </footer>
-# """, unsafe_allow_html=True)
- 
-
-
-
-
-import streamlit as st
+import os
+import json
+import requests
 import joblib
 import numpy as np
-import requests
-import os
+import time
+import streamlit as st
+from streamlit_lottie import st_lottie
 
-# --- Model Loading ---
-def download_file_from_google_drive(file_id, destination):
+# -------------------------------
+# 1. PAGE CONFIGURATION
+# -------------------------------
+st.set_page_config(
+    page_title="NourishAI Pro | Chef System",
+    page_icon="👨‍🍳",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
+
+# -------------------------------
+# 2. LOAD MODEL (CACHED)
+# -------------------------------
+@st.cache_resource
+def load_model():
+    file_id = '1tR6_8S-yISRKZR2QJ6BjU3A3V5HHUCm7'
+    destination = 'recipe_model.pkl'
+
     if not os.path.exists(destination):
         URL = f'https://drive.google.com/uc?id={file_id}'
         session = requests.Session()
@@ -146,228 +34,250 @@ def download_file_from_google_drive(file_id, destination):
                 for chunk in response.iter_content(32768):
                     f.write(chunk)
 
-file_id = '1tR6_8S-yISRKZR2QJ6BjU3A3V5HHUCm7'
-download_file_from_google_drive(file_id, 'recipe_model.pkl')
+    model_data = joblib.load(destination)
+    return {
+        "model": model_data["model"],
+        "vectorizer": model_data["vectorizer"],
+        "label_encoder": model_data["label_encoder"]
+    }
 
-model_data = joblib.load("recipe_model.pkl")
-model = model_data["model"]
-vectorizer = model_data["vectorizer"]
-label_encoder = model_data["label_encoder"]
+model_data = load_model()
 
-# --- Page Configuration ---
-st.set_page_config(page_title="NourishWise", page_icon="👩🍳", layout="wide")
+# -------------------------------
+# 3. SESSION STATE
+# -------------------------------
+if 'generate_clicked' not in st.session_state:
+    st.session_state.generate_clicked = False
+if 'ingredients' not in st.session_state:
+    st.session_state.ingredients = ""
 
-# --- Custom CSS ---
-custom_css = """
+# -------------------------------
+# 4. GLOBAL STYLING
+# -------------------------------
+st.markdown("""
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&family=Patrick+Hand&display=swap');
-
-
-.stApp {
-    background: 
-        linear-gradient(135deg, rgba(255,243,224,0.9) 0%, rgba(255,228,225,0.9) 100%),
-        url('https://www.transparenttextures.com/patterns/food.png');
-    background-attachment: fixed;
-    min-height: 100vh;!important
+:root {
+    --primary: #1E90FF;
+    --bg: #FFFFFF;
+    --card: #FFFFFF;
+    --text: #1E90FF;
+    --input: #FFFFFF;
+    --border: #87CEFA;
 }
-
-/* Add floating food animation */
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-    100% { transform: translateY(0px); }
+body, .stApp {
+    background: var(--bg) !important;
+    color: var(--text) !important;
+    font-family: 'Roboto', sans-serif;
 }
-
-.floating-icon {
-    position: fixed;
-    animation: float 3s ease-in-out infinite;
-    opacity: 0.1;
-    z-index: -1;
+.title-text {
+    font-size: 6rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #2E3C49;
 }
-
-/* Position floating foods */
-.floating-icon:nth-child(1) { left: 10%; top: 20%; }
-.floating-icon:nth-child(2) { left: 30%; top: 60%; }
-.floating-icon:nth-child(3) { right: 15%; top: 40%; }
-
-
-<!-- Floating food icons -->
-<div class="floating-icon">🥑</div>
-<div class="floating-icon">🍳</div>
-<div class="floating-icon">🥕</div>
-.h1 {
-    color: #FF6B6B;
-    font-family: 'Comic Neue', cursive;
-    text-shadow: 2px 2px #FFD700;
-    text-align: center;
-    font-size: 3rem !important;
-    margin-bottom: 0.5rem !important;
+.subtitle-text {
+    font-size: 2rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    color: #2E3C49;
 }
-
-.ingredient-box {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    margin: 2rem auto;
-    max-width: 800px;
-    box-shadow: 0 8px 20px rgba(255,107,107,0.1);
-    border: 3px solid #FFB347;
+div[data-testid="stTextArea"] label {
+    font-size: 1.4rem !important;
+    font-weight: 600 !important;
+    color: #2E3C49 !important;
 }
-
 .stTextArea textarea {
-    border-radius: 15px !important;
-    border: 2px solid #FFB347 !important;
-    font-family: 'Patrick Hand', cursive !important;
-    font-size: 1.2rem !important;
-    transition: all 0.3s ease !important;
-}
-
-.stTextArea textarea:focus {
-    border-color: #FF6B6B !important;
-    box-shadow: 0 0 10px rgba(255,107,107,0.2) !important;
-}
-
-.recipe-card {
-    background: white;
-    border-radius: 20px;
-    padding: 2rem;
-    margin: 2rem 0;
-    box-shadow: 0 8px 25px rgba(255,107,107,0.1);
-    transition: transform 0.3s ease;
-}
-
-.recipe-card:hover {
-    transform: translateY(-5px);
-}
-
-.stButton > button {
-    background: #FF6B6B !important;
-    color: white !important;
-    font-family: 'Comic Neue', cursive !important;
-    font-size: 1.5rem !important;
-    border-radius: 15px !important;
-    padding: 12px 30px !important;
-    transition: all 0.3s ease !important;
-    border: none !important;
-    box-shadow: 0 4px 15px rgba(255,107,107,0.3) !important;
-}
-
-.stButton > button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(255,107,107,0.4) !important;
-}
-
-.stButton > button:active {
-    transform: scale(0.95);
-}
-
-.image-hover {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border-radius: 15px;
-}
-
-.image-hover:hover {
-    transform: scale(1.03);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-}
-
-.fun-fact {
-    background: #FFF8F0;
-    border-left: 5px solid #FF6B6B;
+    font-size: 1.6rem;
     padding: 1.5rem;
-    margin: 2rem 0;
-    border-radius: 15px;
+    background: var(--input);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    min-height: 200px;
+    color: var(--text);
 }
-
-footer {
-    background: white;
-    padding: 2rem;
-    border-radius: 20px;
-    margin-top: 3rem;
-    text-align: center;
-    box-shadow: 0 -8px 20px rgba(255,107,107,0.05);
+.stButton>button {
+    font-size: 1.6rem;
+    padding: 1rem 2rem;
+    background: var(--primary);
+    color: #FFF;
+    border: none;
+    border-radius: 12px;
+    margin-top: 1.5rem;
+    width: 100%;
+}
+.stButton>button:hover {
+    background: #1A7AD9;
+}
+.recipe-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    border: 2px solid var(--border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    color: var(--text);
+}
+.recipe-card h3 {
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+.big-text {
+    font-size: 1.4rem;
+    line-height: 1.6;
+    color: var(--text);
+}
+.photo-container {
+    width: 100%;
+    padding-top: 100%;
+    position: relative;
+    margin: 0 auto;
+}
+.photo-container img {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid var(--border);
 }
 </style>
-"""
-st.markdown(custom_css, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# --- Header Section ---
-st.markdown("<h1>👨👩👧👦 Family Recipe Finder</h1>", unsafe_allow_html=True)
+# -------------------------------
+# 5. HEADER
+# -------------------------------
 st.markdown("""
-<div style='text-align: center; margin-bottom: 2rem;'>
-    <p style='font-family: "Patrick Hand", cursive; font-size: 1.4rem; color: #666;'>
-        Turn your kitchen ingredients into fun family meals! 🍳
-    </p>
+<div style="text-align: center; padding: 1rem 0;">
+    <h1 class="title-text">NOURISH AI</h1>
+    <p class="subtitle-text">Professional Recipe Generator</p>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Ingredients Input ---
-with st.container():
-    st.markdown("<div class='ingredient-box'>", unsafe_allow_html=True)
+# -------------------------------
+# 6. LOAD LOTTIE FILES
+# -------------------------------
+def load_lottie_file(filename):
+    path = os.path.join(r"C:\Users\AUB\Documents\GitHub\EECE-490", filename)
+    if os.path.exists(path):
+        try:
+            with open(path, "r") as f:
+                return json.load(f)
+        except:
+            return None
+    return None
+
+lottie_data = load_lottie_file("Animation.json")
+lottie_data_2 = load_lottie_file("Animation1.json")
+
+# -------------------------------
+# 7. SHOW LOTTIE ANIMATION
+# -------------------------------
+def show_lottie_animation(animation_data, speed=1, height=300, width=300, key_suffix=""):
+    if animation_data:
+        st.markdown(
+            f"""<div style="background-color:#FFFFFF; padding:1rem; border-radius:12px; text-align:center;">""",
+            unsafe_allow_html=True
+        )
+        st_lottie(
+            animation_data,
+            speed=speed,
+            reverse=False,
+            loop=True,
+            quality="high",
+            height=height,
+            width=width,
+            key=f"anim_{key_suffix}"
+        )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+# -------------------------------
+# 8. LAYOUT
+# -------------------------------
+col_input, col_anim, col_output = st.columns([1, 0.8, 1])
+
+# INPUT + IMAGES
+with col_input:
     ingredients = st.text_area(
-        "### 🧺 Enter Your Ingredients",
-        height=150,
-        placeholder="Type your ingredients here (comma-separated)...\nExample: chicken, broccoli, rice, garlic...",
-        help="Let's see what delicious meal we can create!"
+        "ENTER INGREDIENTS (COMMA SEPARATED):",
+        height=200,
+        placeholder="e.g., chicken breast, garlic, olive oil, fresh basil...",
+        key="main_input"
     )
-    st.markdown("</div>", unsafe_allow_html=True)
-
-# --- Main Content ---
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    if st.button("✨ Let's Create Magic!", use_container_width=True):
+    if st.button("🔍 GENERATE RECIPES", key="main_button"):
         if not ingredients.strip():
-            st.error("⛔ Oops! We need some ingredients to work our magic!")
+            st.error("Please enter ingredients to continue", icon="⚠️")
+            st.session_state.generate_clicked = False
         else:
-            try:
-                X_input = vectorizer.transform([ingredients]).toarray()
-                y_pred = model.predict(X_input)
-                recipe_index = np.argmax(y_pred, axis=1)
-                predicted_recipe = label_encoder.inverse_transform(recipe_index)
-                
+            st.session_state.generate_clicked = True
+            st.session_state.ingredients = ingredients
+
+    st.markdown("<hr style='border: none; height: 2px; background: var(--border);'>", unsafe_allow_html=True)
+
+    image_urls = [
+        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
+        "https://images.unsplash.com/photo-1512621776951-a57141f2eefd",
+        "https://images.unsplash.com/photo-1490645935967-10de6ba17061",
+        "https://images.unsplash.com/photo-1504674900247-0877df9cc836"
+    ]
+
+    for i in range(0, 4, 2):
+        row = st.columns(2)
+        for j in range(2):
+            with row[j]:
                 st.markdown(f"""
-                <div class='recipe-card'>
-                    <h2 style='color: #FF6B6B; text-align: center;'>🎉 Ta-da! We Recommend...</h2>
-                    <div style='font-size: 3rem; text-align: center; margin: 1rem 0;'>🍲</div>
-                    <h1 style='text-align: center; color: #666;'>{predicted_recipe[0]}</h1>
-                    
-                    <div class='fun-fact'>
-                        <h3 style='color: #FF6B6B;'>👨👩👧👦 Family Cooking Challenge!</h3>
-                        <div style='display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;'>
-                            <div style='padding: 1rem; background: #FFF0F0; border-radius: 15px;'>
-                                <h4>👶 Little Chefs</h4>
-                                <p>• Mixing ingredients<br>• Decorating<br>• Choosing colors</p>
-                            </div>
-                            <div style='padding: 1rem; background: #FFF0F0; border-radius: 15px;'>
-                                <h4>👩🍳 Big Chefs</h4>
-                                <p>• Measuring<br>• Cooking<br>• Time management</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="photo-container">
+                    <img src="{image_urls[i + j]}" alt="Photo {i + j + 1}">
                 </div>
                 """, unsafe_allow_html=True)
-                st.balloons()
+
+# ANIMATIONS
+with col_anim:
+    if st.session_state.generate_clicked and lottie_data:
+        show_lottie_animation(lottie_data, key_suffix="1")
+    if st.session_state.generate_clicked and lottie_data_2:
+        show_lottie_animation(lottie_data_2, key_suffix="2")
+
+# OUTPUT RECIPES
+with col_output:
+    if st.session_state.generate_clicked:
+        with st.spinner("Analyzing ingredients and generating recipes..."):
+            time.sleep(1.2)
+            try:
+                X_input = model_data["vectorizer"].transform([st.session_state.ingredients]).toarray()
+                y_pred = model_data["model"].predict(X_input)
+                top3_indices = np.argsort(y_pred, axis=1)[0][-3:][::-1]
+                top3_recipes = model_data["label_encoder"].inverse_transform(top3_indices)
+                top3_scores = (y_pred[0][top3_indices] * 100).astype(int)
+
+                st.markdown(f"""
+                <div style="margin-bottom: 1rem; text-align: center;">
+                    <h2 style="font-size: 1.8rem; color: var(--text);">✨ RECOMMENDED RECIPES ✨</h2>
+                    <p class="big-text">For: <strong>{st.session_state.ingredients}</strong></p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                for recipe_name, score in zip(top3_recipes, top3_scores):
+                    prep_time = np.random.randint(15, 60)
+                    card_html = f"""
+                    <div class="recipe-card">
+                        <h3>{recipe_name}</h3>
+                        <p class="big-text">🍳 <strong>{prep_time} minutes preparation</strong></p>
+                        <p class="big-text">⭐ <strong>{score}% ingredient match</strong></p>
+                        <div style="height: 20px; background: var(--primary);
+                                    width: {score}%; border-radius: 8px; margin: 1rem 0;"></div>
+                    </div>
+                    """
+                    st.markdown(card_html, unsafe_allow_html=True)
+
             except Exception as e:
-                st.error(f"❌ Oh no! Our recipe book got messy! Please try again.")
+                st.error(f"Analysis error: {str(e)}", icon="❌")
 
-with col2:
-    st.markdown("""
-    <div class='recipe-card'>
-        <h3 style='color: #FF6B6B;'>🍴 Today's Featured Recipe</h3>
-        <img src='https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' 
-             class='image-hover' style='width: 100%; border-radius: 15px; margin: 1rem 0;'>
-        <h4 style='color: #666;'>Rainbow Veggie Stir-Fry</h4>
-        <p style='color: #888;'>A colorful mix of fresh vegetables in a tangy sauce</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-# --- Footer ---
-st.markdown("""
-<footer>
-    <p style='font-family: "Comic Neue"; font-size: 1.1rem; color: #666;'>
-        🍳 Made with ❤️ by Family Kitchen Friends 🍪<br>
-        Let's create delicious memories together!
-    </p>
-</footer>
-""", unsafe_allow_html=True)
+# -------------------------------
+# 9. SUPPRESS TENSORFLOW WARNINGS
+# -------------------------------
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+import logging
+logging.getLogger('tensorflow').setLevel(logging.ERROR)
