@@ -53,7 +53,7 @@ def load_image_model():
     import pickle
 
     url = "https://drive.google.com/uc?export=download&id=1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX"
-    destination = "test.pkl"
+    destination = "490Image.pkl"
 
     # Redownload if file doesn't exist or is too small (corrupted)
     if not os.path.exists(destination) or os.path.getsize(destination) < 1000:
