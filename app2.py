@@ -7,13 +7,13 @@ import time
 import streamlit as st
 from streamlit_lottie import st_lottie
 import pickle
-from fastapi import FastAPI
-from pydantic import BaseModel
-import faiss
-import pickle
-import numpy as np
-from sentence_transformers import SentenceTransformer
-from fastapi.middleware.cors import CORSMiddleware
+# from fastapi import FastAPI
+# from pydantic import BaseModel
+# import faiss
+# import pickle
+# import numpy as np
+# from sentence_transformers import SentenceTransformer
+# from fastapi.middleware.cors import CORSMiddleware
 category_dict = np.load('category_dict.npy', allow_pickle=True).item()
 
 # -------------------------------
@@ -103,28 +103,28 @@ def load_image_model():
 
 
 svc_model = load_image_model()
-import faiss
-from sentence_transformers import SentenceTransformer
-import pickle
+# import faiss
+# from sentence_transformers import SentenceTransformer
+# import pickle
 
-# Add this initialization section after your other model loads
-@st.cache_resource
-def load_fastapi_components():
-    # Download FAISS index and data
-    faiss_url = "https://drive.google.com/uc?id=1hyZ5OaqGT7pBRdY33oDFldldmozEfC0m"
-    data_url = "https://drive.google.com/uc?id=1lhzN-CF5SDXPQo0lHY_BcGz6hqhzDVEg"
+# # Add this initialization section after your other model loads
+# @st.cache_resource
+# def load_fastapi_components():
+#     # Download FAISS index and data
+#     faiss_url = "https://drive.google.com/uc?id=1hyZ5OaqGT7pBRdY33oDFldldmozEfC0m"
+#     data_url = "https://drive.google.com/uc?id=1lhzN-CF5SDXPQo0lHY_BcGz6hqhzDVEg"
     
-    # Download files using gdown
-    faiss_path = gdown.download(faiss_url, "recipes_index.faiss", quiet=True)
-    data_path = gdown.download(data_url, "recipes_data.pkl", quiet=True)
+#     # Download files using gdown
+#     faiss_path = gdown.download(faiss_url, "recipes_index.faiss", quiet=True)
+#     data_path = gdown.download(data_url, "recipes_data.pkl", quiet=True)
     
-    # Load components
-    index = faiss.read_index("recipes_index.faiss")
-    with open("recipes_data.pkl", "rb") as f:
-        rag_texts = pickle.load(f)
-    model = SentenceTransformer("all-MiniLM-L6-v2")
+#     # Load components
+#     index = faiss.read_index("recipes_index.faiss")
+#     with open("recipes_data.pkl", "rb") as f:
+#         rag_texts = pickle.load(f)
+#     model = SentenceTransformer("all-MiniLM-L6-v2")
     
-    return index, rag_texts, model
+#     return index, rag_texts, model
 # -------------------------------
 # 3. SESSION STATE
 # -------------------------------
@@ -358,21 +358,21 @@ col_input, col_anim, col_output = st.columns([1, 0.8, 1])
 # INPUT + IMAGES
 with col_input:
     uploaded_file = st.file_uploader("OR Upload an Image of the Dish:", type=["jpg", "jpeg", "png"], key="image_upload")
-    ingredients = st.text_area(
-        "ENTER INGREDIENTS (COMMA SEPARATED):",
-        height=200,
-        placeholder="e.g., chicken breast, garlic, olive oil, fresh basil...",
-        key="main_input"
-    )
-    if st.button("🔍 GENERATE RECIPES", key="main_button"):
-        if not ingredients.strip():
-            st.error("Please enter ingredients to continue", icon="⚠️")
-            st.session_state.generate_clicked = False
-        else:
-            st.session_state.generate_clicked = True
-            st.session_state.ingredients = ingredients
+    # ingredients = st.text_area(
+    #     "ENTER INGREDIENTS (COMMA SEPARATED):",
+    #     height=200,
+    #     placeholder="e.g., chicken breast, garlic, olive oil, fresh basil...",
+    #     key="main_input"
+    # )
+    # if st.button("🔍 GENERATE RECIPES", key="main_button"):
+    #     if not ingredients.strip():
+    #         st.error("Please enter ingredients to continue", icon="⚠️")
+    #         st.session_state.generate_clicked = False
+    #     else:
+    #         st.session_state.generate_clicked = True
+    #         st.session_state.ingredients = ingredients
 
-    st.markdown("<hr style='border: none; height: 2px; background: var(--border);'>", unsafe_allow_html=True)
+    # st.markdown("<hr style='border: none; height: 2px; background: var(--border);'>", unsafe_allow_html=True)
 
     image_urls = [
         "https://images.unsplash.com/photo-1546069901-ba9599a7e63c",
@@ -400,35 +400,35 @@ with col_anim:
 
 # OUTPUT RECIPES
 with col_output:
-    if st.session_state.generate_clicked:
-        with st.spinner("Analyzing ingredients and generating recipes..."):
-            try:
-                # Load components if not already loaded
-                if 'faiss_components' not in st.session_state:
-                    index, rag_texts, model = load_fastapi_components()
-                    st.session_state.faiss_components = (index, rag_texts, model)
-                else:
-                    index, rag_texts, model = st.session_state.faiss_components
+    # if st.session_state.generate_clicked:
+    #     with st.spinner("Analyzing ingredients and generating recipes..."):
+    #         try:
+    #             # Load components if not already loaded
+    #             if 'faiss_components' not in st.session_state:
+    #                 index, rag_texts, model = load_fastapi_components()
+    #                 st.session_state.faiss_components = (index, rag_texts, model)
+    #             else:
+    #                 index, rag_texts, model = st.session_state.faiss_components
 
-                # Perform the FAISS search
-                q_embed = model.encode([ingredients], convert_to_numpy=True)
-                faiss.normalize_L2(q_embed)
-                scores, ids = index.search(q_embed, k=3)
+    #             # Perform the FAISS search
+    #             q_embed = model.encode([ingredients], convert_to_numpy=True)
+    #             faiss.normalize_L2(q_embed)
+    #             scores, ids = index.search(q_embed, k=3)
 
-                # Format results
-                results = []
-                for i, idx in enumerate(ids[0]):
-                    recipe = rag_texts[idx]
-                    match = round(scores[0][i] * 100, 2)
-                    results.append(f"✅ Match: {match}%\n\n{recipe}")
+    #             # Format results
+    #             results = []
+    #             for i, idx in enumerate(ids[0]):
+    #                 recipe = rag_texts[idx]
+    #                 match = round(scores[0][i] * 100, 2)
+    #                 results.append(f"✅ Match: {match}%\n\n{recipe}")
 
-                output = "\n\n\n".join(results)
+    #             output = "\n\n\n".join(results)
                 
-                st.success("✅ Recipes generated:")
-                st.markdown(f"<pre style='background:#f9f9f9; padding:1rem'>{output}</pre>", unsafe_allow_html=True)
+    #             st.success("✅ Recipes generated:")
+    #             st.markdown(f"<pre style='background:#f9f9f9; padding:1rem'>{output}</pre>", unsafe_allow_html=True)
 
-            except Exception as e:
-                st.error(f"❌ Error generating recipes: {e}")
+    #         except Exception as e:
+    #             st.error(f"❌ Error generating recipes: {e}")
     if uploaded_file is not None:
         try:
             with st.spinner("Analyzing image and identifying dish..."):
