@@ -225,20 +225,19 @@ def preprocess_for_svc(image_bytes):
     return flat_array
 def format_nutrition(nutrition_list):
     r_dict = {}
+    labels = ['Calories', 'total fat', 'total sugar', 
+             'sodium', 'protein', 'saturated fat']
+    
     if len(nutrition_list) == 7:
-        # Skip the 6th element (index 5) if length is 7
-        labels = ['Calories', 'total fat', 'total sugar', 
-                 'sodium', 'protein', 'saturated fat']
+        # For 7-element lists, skip index 5 and use index 6 for saturated fat
         indices = [0, 1, 2, 3, 4, 6]
-        
-        for i in range(len(indices)):
-            r_dict[labels[i]] : nutrition_list[indices[i]]
     else:
-        labels = ['Calories', 'total fat', 'total sugar',
-                 'sodium', 'protein', 'saturated fat']
+        # For standard 6-element lists
         indices = range(len(labels))
-        for i in range(len(indices)):
-            r_dict[labels[i]] : nutrition_list[indices[i]]
+    
+    for i in range(len(labels)):
+        if indices[i] < len(nutrition_list):
+            r_dict[labels[i]] = nutrition_list[indices[i]]
     
     return r_dict
 def get_recipe_attributes(name):
