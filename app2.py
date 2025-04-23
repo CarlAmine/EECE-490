@@ -57,7 +57,7 @@ def load_image_model():
 
     # Redownload if file doesn't exist or is too small (corrupted)
     if not os.path.exists(destination) or os.path.getsize(destination) < 1000:
-        gdown.download(url, destination, quiet=False)
+        gdown.download(url, destination, quiet=False,use_cookies = True)
 
     # Double-check size again after download
     if os.path.getsize(destination) < 1000:
