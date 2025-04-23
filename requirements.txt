@@ -1,5 +1,5 @@
-keras==2.11.0
-tensorflow==2.11.0
+pip uninstall keras -y
+pip install tf-keras
 streamlit
 scikit-learn
 numpy
