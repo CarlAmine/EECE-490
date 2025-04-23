@@ -48,13 +48,32 @@ import pickle
 import streamlit as st
 @st.cache_resource
 def load_image_model():
-    url = https://github.com/CarlAmine/EECE-490/releases/download/v1.0/490Image.pkl
+    url = "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0/490Image.pkl"
+    destination = "490Image.pkl"
+    expected_size = 687 * 1024 * 1024  # 687 MB in bytes
 
-    response = requests.get(url,allow_redirects= True)
-    with open("490Image.pkl", "wb") as f:
-        f.write(response.content)
+    def download_file_stream(url, destination):
+        with requests.get(url, stream=True) as r:
+            r.raise_for_status()
+            with open(destination, 'wb') as f:
+                for chunk in r.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
 
-    with open("490Image.pkl", "rb") as f:
+    # Check if file is already good
+    if not os.path.exists(destination) or os.path.getsize(destination) < expected_size:
+        st.write("Downloading model file from GitHub...")
+        try:
+            download_file_stream(url, destination)
+        except Exception as e:
+            raise RuntimeError(f"Download failed: {e}")
+
+    # Final size check
+    if os.path.getsize(destination) < expected_size:
+        raise ValueError("Downloaded file is too small. Possibly corrupted.")
+
+    # Load model
+    with open(destination, "rb") as f:
         model = pickle.load(f)
 
     return model
