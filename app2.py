@@ -224,18 +224,23 @@ def preprocess_for_svc(image_bytes):
     flat_array = img_array.flatten().reshape(1, -1)  # make it 1D per image
     return flat_array
 def format_nutrition(nutrition_list):
+    r_dict = {}
     if len(nutrition_list) == 7:
         # Skip the 6th element (index 5) if length is 7
         labels = ['Calories', 'total fat', 'total sugar', 
                  'sodium', 'protein', 'saturated fat']
         indices = [0, 1, 2, 3, 4, 6]
+        
+        for i in range(len(indices)):
+            r_dict[labels[i]] : nutrition_list[indices[i]]
     else:
         labels = ['Calories', 'total fat', 'total sugar',
                  'sodium', 'protein', 'saturated fat']
         indices = range(len(labels))
+        for i in range(len(indices)):
+            r_dict[labels[i]] : nutrition_list[indices[i]]
     
-    return '\n'.join([f'{nutrition_list[i]} {labels[idx]}' 
-                    for idx, i in enumerate(indices) if i < len(nutrition_list)])
+    return r_dict
 def get_recipe_attributes(name):
     target = name.lower()  # Case-insensitive search
     # Get indices of rows where 'name' column contains the target substring
