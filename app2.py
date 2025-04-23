@@ -7,6 +7,12 @@ import time
 import streamlit as st
 from streamlit_lottie import st_lottie
 import pickle
+import os
+
+input_dir = r'C:\Users\carla\.cache\kagglehub\datasets\synysterjeet\food-classification\versions\6/dataset/train'
+categories = sorted(os.listdir(input_dir))  # sort to ensure consistent order
+category_dict = {idx: category for idx, category in enumerate(categories)}
+
 # -------------------------------
 # 1. PAGE CONFIGURATION
 # -------------------------------
@@ -330,7 +336,7 @@ with col_output:
             with st.spinner("Analyzing image and identifying dish..."):
                 img_array = preprocess_for_svc(uploaded_file.read())
                 prediction = svc_model.predict(img_array)
-                predicted_class = prediction
+                predicted_class = category_dict[prediction[0]]
     
                 st.markdown(f"""
                 <div class="recipe-card">
