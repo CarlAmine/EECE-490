@@ -55,7 +55,7 @@ def load_image_model():
     if not os.path.exists(destination):
         gdown.download(url, destination, quiet=False)
 
-    with open(destination, 'rb') as f:
+    with open(destination, 'wb') as f:
         model = pickle.load(f)
     return model
 
