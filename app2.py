@@ -50,7 +50,7 @@ import streamlit as st
 def load_image_model():
     url = https://github.com/CarlAmine/EECE-490/releases/download/v1.0/490Image.pkl
 
-    response = requests.get(url)
+    response = requests.get(url,allow_redirects= True)
     with open("490Image.pkl", "wb") as f:
         f.write(response.content)
 
