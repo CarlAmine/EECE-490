@@ -49,22 +49,25 @@ import streamlit as st
 @st.cache_resource
 def load_image_model():
     import gdown
-    import pickle
     import os
+    import pickle
 
-    file_id = "1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX"
+    url = "https://drive.google.com/uc?export=download&id=1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX"
     destination = "test.pkl"
 
-    if not os.path.exists(destination):
-        gdown.download(id=file_id, output=destination, quiet=False)
+    # Redownload if file doesn't exist or is too small (corrupted)
+    if not os.path.exists(destination) or os.path.getsize(destination) < 1000:
+        gdown.download(url, destination, quiet=False)
 
-    # Validate file size
+    # Double-check size again after download
     if os.path.getsize(destination) < 1000:
-        raise ValueError("Downloaded file is too small. Possibly corrupted.")
+        raise ValueError("Downloaded file is too small. Possibly corrupted HTML instead of .pkl.")
 
     with open(destination, "rb") as f:
         model = pickle.load(f)
+
     return model
+
 
 svc_model = load_image_model()
 
