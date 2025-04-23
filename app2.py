@@ -223,23 +223,39 @@ def preprocess_for_svc(image_bytes):
     img_array = np.array(img) / 255.0  # normalize if you trained this way
     flat_array = img_array.flatten().reshape(1, -1)  # make it 1D per image
     return flat_array
+import re
+
 def format_nutrition(nutrition_list):
-    r_dict = {}
+    # Clean and convert all values to numbers
+    cleaned = []
+    for item in nutrition_list:
+        # Remove all non-numeric characters except decimal points
+        clean_str = re.sub(r'[^\d.]', '', str(item))
+        if clean_str:
+            try:
+                cleaned.append(float(clean_str))
+            except ValueError:
+                continue  # Skip invalid entries
+    
+    # Create nutrition dictionary
     labels = ['Calories', 'total fat', 'total sugar', 
              'sodium', 'protein', 'saturated fat']
     
-    if len(nutrition_list) == 7:
-        # For 7-element lists, skip index 5 and use index 6 for saturated fat
-        indices = [0, 1, 2, 3, 4, 6]
-    else:
-        # For standard 6-element lists
-        indices = range(len(labels))
+    nutrition_dict = {}
+    if len(cleaned) >= 6:  # Only process if we have enough values
+        if len(cleaned) == 7:
+            # Use indices 0,1,2,3,4,6 (skip index 5)
+            indices = [0, 1, 2, 3, 4, 6]
+        else:
+            indices = range(6)
+        
+        for i, label in enumerate(labels):
+            if i < len(indices) and indices[i] < len(cleaned):
+                nutrition_dict[label] = cleaned[indices[i]]
+            else:
+                nutrition_dict[label] = None
     
-    for i in range(len(labels)):
-        if indices[i] < len(nutrition_list):
-            r_dict[labels[i]] = nutrition_list[indices[i]]
-    
-    return r_dict
+    return nutrition_dict
 def get_recipe_attributes(name):
     target = name.lower()  # Case-insensitive search
     # Get indices of rows where 'name' column contains the target substring
