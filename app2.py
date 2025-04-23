@@ -42,7 +42,25 @@ def load_model():
     }
 
 model_data = load_model()
+@st.cache_resource
+def load_image_model():
+    file_id = 'YOUR_FILE_ID_HERE'  # <-- update this
+    destination = '490Image.pkl'
 
+    if not os.path.exists(destination):
+        URL = f'https://drive.google.com/uc?id={file_id}'
+        session = requests.Session()
+        response = session.get(URL, stream=True)
+        if 'Content-Disposition' in response.headers:
+            with open(destination, 'wb') as f:
+                for chunk in response.iter_content(32768):
+                    f.write(chunk)
+
+    with open(destination, 'rb') as f:
+        model = pickle.load(f)
+    return model
+
+svc_model = load_image_model()
 # -------------------------------
 # 3. SESSION STATE
 # -------------------------------
@@ -159,6 +177,17 @@ st.markdown("""
 # -------------------------------
 # 6. LOAD LOTTIE FILES
 # -------------------------------
+from PIL import Image
+import numpy as np
+import io
+
+def preprocess_for_svc(image_bytes):
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    img = img.resize((150, 150))  # <-- use the size from your training
+    img_array = np.array(img) / 255.0  # normalize if you trained this way
+    flat_array = img_array.flatten().reshape(1, -1)  # make it 1D per image
+    return flat_array
+
 def load_lottie_file(filename):
     path = os.path.join(r"C:\Users\AUB\Documents\GitHub\EECE-490", filename)
     if os.path.exists(path):
@@ -200,6 +229,7 @@ col_input, col_anim, col_output = st.columns([1, 0.8, 1])
 
 # INPUT + IMAGES
 with col_input:
+    uploaded_file = st.file_uploader("OR Upload an Image of the Dish:", type=["jpg", "jpeg", "png"], key="image_upload")
     ingredients = st.text_area(
         "ENTER INGREDIENTS (COMMA SEPARATED):",
         height=200,
@@ -274,7 +304,22 @@ with col_output:
 
             except Exception as e:
                 st.error(f"Analysis error: {str(e)}", icon="❌")
+    if uploaded_file is not None:
+    try:
+        with st.spinner("Analyzing image and identifying dish..."):
+            img_array = preprocess_for_svc(uploaded_file.read())
+            prediction = svc_model.predict(img_array)
+            predicted_class = prediction[0]
 
+            st.markdown(f"""
+            <div class="recipe-card">
+                <h3>📷 Dish Identified from Image</h3>
+                <p class="big-text">🍽️ <strong>{predicted_class}</strong></p>
+            </div>
+            """, unsafe_allow_html=True)
+
+    except Exception as e:
+        st.error(f"Image prediction error: {str(e)}", icon="🛑")
 # -------------------------------
 # 9. SUPPRESS TENSORFLOW WARNINGS
 # -------------------------------
