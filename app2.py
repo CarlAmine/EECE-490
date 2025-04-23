@@ -59,10 +59,6 @@ def load_image_model():
     if not os.path.exists(destination) or os.path.getsize(destination) < 1000:
         gdown.download(url, destination, quiet=False,use_cookies = True)
 
-    # Double-check size again after download
-    if os.path.getsize(destination) < 1000:
-        raise ValueError("Downloaded file is too small. Possibly corrupted HTML instead of .pkl.")
-
     with open(destination, "rb") as f:
         model = pickle.load(f)
 
