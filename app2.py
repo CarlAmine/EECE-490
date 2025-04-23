@@ -360,41 +360,41 @@ with col_output:
             except Exception as e:
                 st.error(f"Analysis error: {str(e)}", icon="❌")
    if uploaded_file is not None:
-    try:
-        with st.spinner("Analyzing image and identifying dish..."):
-            img_array = preprocess_for_svc(uploaded_file.read())
-            prediction = svc_model.predict(img_array)
-            predicted_class = category_dict[prediction[0]]
-            predicted_class = predicted_class.replace('_',' ')
-            
-            # Display prediction
-            st.markdown(f"""
-            <div class="recipe-card">
-                <h3>📷 Dish Identified from Image</h3>
-                <p class="big-text">🍽️ <strong>{predicted_class}</strong></p>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Get recipe attributes using the predicted class
-            recipe_data = get_recipe_attributes(predicted_class)
-            
-            # Check if recipe found
-            if 'error' not in recipe_data:
-                # Display recipe details in a card format
+        try:
+            with st.spinner("Analyzing image and identifying dish..."):
+                img_array = preprocess_for_svc(uploaded_file.read())
+                prediction = svc_model.predict(img_array)
+                predicted_class = category_dict[prediction[0]]
+                predicted_class = predicted_class.replace('_',' ')
+                
+                # Display prediction
                 st.markdown(f"""
                 <div class="recipe-card">
-                    <h3>📝 Recipe Details</h3>
-                    <p>⏱ Cooking Time: <strong>{recipe_data['minutes']} minutes</strong></p>
-                    <p>🥕 Ingredients: <strong>{', '.join(recipe_data['ingredients'])}</strong></p>
-                    <p>👩🍳 Steps: <strong>{recipe_data['steps']}</strong></p>
-                    <p>📊 Nutrition: <strong>{recipe_data['nutrition']}</strong></p>
+                    <h3>📷 Dish Identified from Image</h3>
+                    <p class="big-text">🍽️ <strong>{predicted_class}</strong></p>
                 </div>
                 """, unsafe_allow_html=True)
-            else:
-                st.warning(f"No recipe found for {predicted_class}", icon="⚠️")
-
-    except Exception as e:
-        st.error(f"Error: {str(e)}", icon="🛑")
+                
+                # Get recipe attributes using the predicted class
+                recipe_data = get_recipe_attributes(predicted_class)
+                
+                # Check if recipe found
+                if 'error' not in recipe_data:
+                    # Display recipe details in a card format
+                    st.markdown(f"""
+                    <div class="recipe-card">
+                        <h3>📝 Recipe Details</h3>
+                        <p>⏱ Cooking Time: <strong>{recipe_data['minutes']} minutes</strong></p>
+                        <p>🥕 Ingredients: <strong>{', '.join(recipe_data['ingredients'])}</strong></p>
+                        <p>👩🍳 Steps: <strong>{recipe_data['steps']}</strong></p>
+                        <p>📊 Nutrition: <strong>{recipe_data['nutrition']}</strong></p>
+                    </div>
+                    """, unsafe_allow_html=True)
+                else:
+                    st.warning(f"No recipe found for {predicted_class}", icon="⚠️")
+    
+        except Exception as e:
+            st.error(f"Error: {str(e)}", icon="🛑")
 # -------------------------------
 # 9. SUPPRESS TENSORFLOW WARNINGS
 # -------------------------------
