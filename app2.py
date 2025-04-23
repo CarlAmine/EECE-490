@@ -333,7 +333,7 @@ with col_output:
                 img_array = preprocess_for_svc(uploaded_file.read())
                 prediction = svc_model.predict(img_array)
                 predicted_class = category_dict[prediction[0]]
-    
+                predicted_class = predicted_class.replace('_',' ')
                 st.markdown(f"""
                 <div class="recipe-card">
                     <h3>📷 Dish Identified from Image</h3>
