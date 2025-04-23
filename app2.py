@@ -42,25 +42,25 @@ def load_model():
     }
 
 model_data = load_model()
+import gdown
+import os
+import pickle
+import streamlit as st
+
 @st.cache_resource
 def load_image_model():
-    file_id = '1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX'  # <-- update this 
-    destination = '490Image.pkl'
+    url = "https://drive.google.com/uc?id=1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX"
+    destination = "490Image.pkl"
 
     if not os.path.exists(destination):
-        URL = f'https://drive.google.com/uc?id={file_id}'
-        session = requests.Session()
-        response = session.get(URL, stream=True)
-        if 'Content-Disposition' in response.headers:
-            with open(destination, 'wb') as f:
-                for chunk in response.iter_content(32768):
-                    f.write(chunk)
+        gdown.download(url, destination, quiet=False)
 
     with open(destination, 'rb') as f:
         model = pickle.load(f)
     return model
 
 svc_model = load_image_model()
+
 # -------------------------------
 # 3. SESSION STATE
 # -------------------------------
