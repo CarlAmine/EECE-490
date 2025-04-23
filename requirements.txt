@@ -7,3 +7,8 @@ joblib
 requests
 gdown
 streamlit_lottie
+fastapi
+uvicorn[standard]
+faiss-cpu
+sentence-transformers
+openai>=1.0.0
