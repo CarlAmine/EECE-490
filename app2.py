@@ -225,35 +225,41 @@ def preprocess_for_svc(image_bytes):
     return flat_array
 import re
 
-def format_nutrition(nutrition_list):
-    # Clean and convert all values to numbers
-    cleaned = []
-    for item in nutrition_list:
-        # Remove all non-numeric characters except decimal points
-        clean_str = re.sub(r'[^\d.]', '', str(item))
-        if clean_str:
-            try:
-                cleaned.append(float(clean_str))
-            except ValueError:
-                continue  # Skip invalid entries
+def format_nutrition(nutrition_data):
+    # Convert to string and clean
+    nutrition_str = str(nutrition_data)
     
-    # Create nutrition dictionary
+    # Remove all non-numeric characters except commas and decimals
+    cleaned = re.sub(r'[^\d.,]', '', nutrition_str)
+    
+    # Split into individual number strings
+    number_strings = [s for s in cleaned.split(',') if s]
+    
+    # Convert to floats, ignoring empty/invalid values
+    numbers = []
+    for num_str in number_strings:
+        try:
+            numbers.append(float(num_str))
+        except ValueError:
+            continue
+    
+    # Map to nutrition labels
     labels = ['Calories', 'total fat', 'total sugar', 
              'sodium', 'protein', 'saturated fat']
     
     nutrition_dict = {}
-    if len(cleaned) >= 6:  # Only process if we have enough values
-        if len(cleaned) == 7:
-            # Use indices 0,1,2,3,4,6 (skip index 5)
-            indices = [0, 1, 2, 3, 4, 6]
-        else:
-            indices = range(6)
+    if len(numbers) >= 6:
+        # Use indices 0-4, then 6 for 7-element lists
+        indices = [0, 1, 2, 3, 4, 6] if len(numbers) == 7 else range(6)
         
         for i, label in enumerate(labels):
-            if i < len(indices) and indices[i] < len(cleaned):
-                nutrition_dict[label] = cleaned[indices[i]]
-            else:
+            try:
+                nutrition_dict[label] = numbers[indices[i]]
+            except (IndexError, KeyError):
                 nutrition_dict[label] = None
+    else:
+        # Return all None if insufficient data
+        nutrition_dict = {label: None for label in labels}
     
     return nutrition_dict
 def get_recipe_attributes(name):
