@@ -46,7 +46,6 @@ import gdown
 import os
 import pickle
 import streamlit as st
-
 @st.cache_resource
 def load_image_model():
     url = "https://drive.google.com/uc?id=1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX"
@@ -55,7 +54,7 @@ def load_image_model():
     if not os.path.exists(destination):
         gdown.download(url, destination, quiet=False)
 
-    with open(destination, 'wb') as f:
+    with open(destination, 'rb') as f:
         model = pickle.load(f)
     return model
 
