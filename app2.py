@@ -22,6 +22,19 @@ st.set_page_config(
 # -------------------------------
 # 2. LOAD MODEL (CACHED)
 # -------------------------------
+import gdown
+
+def load_recipe_csv():
+    file_id = '1lE6zl-9dJKUnNu6CDuBvHPpGodKrGnoX'
+    output = 'raw_recipes.npy'
+    url = f'https://drive.google.com/uc?id={file_id}'
+
+    if not os.path.exists(output):
+        gdown.download(url, output, quiet=False)
+
+    df = np.load('raw_recipe.npy', allow_pickle=True).item()
+    return df
+recipe_dict = load_recipe_csv()
 @st.cache_resource
 def load_model():
     file_id = '1tR6_8S-yISRKZR2QJ6BjU3A3V5HHUCm7'
