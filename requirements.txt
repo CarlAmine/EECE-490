@@ -1,5 +1,4 @@
-pip uninstall keras -y
-pip install tf-keras
+tensorflow
 streamlit
 scikit-learn
 numpy
