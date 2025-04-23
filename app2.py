@@ -35,28 +35,28 @@ def load_recipe_csv():
     df = np.load('raw_recipes.npy', allow_pickle=True).item()
     return df
 recipe_dict = load_recipe_csv()
-@st.cache_resource
-def load_model():
-    file_id = '1tR6_8S-yISRKZR2QJ6BjU3A3V5HHUCm7'
-    destination = 'recipe_model.pkl'
+# @st.cache_resource
+# def load_model():
+#     file_id = '1tR6_8S-yISRKZR2QJ6BjU3A3V5HHUCm7'
+#     destination = 'recipe_model.pkl'
 
-    if not os.path.exists(destination):
-        URL = f'https://drive.google.com/uc?id={file_id}'
-        session = requests.Session()
-        response = session.get(URL, stream=True)
-        if 'Content-Disposition' in response.headers:
-            with open(destination, 'wb') as f:
-                for chunk in response.iter_content(32768):
-                    f.write(chunk)
+#     if not os.path.exists(destination):
+#         URL = f'https://drive.google.com/uc?id={file_id}'
+#         session = requests.Session()
+#         response = session.get(URL, stream=True)
+#         if 'Content-Disposition' in response.headers:
+#             with open(destination, 'wb') as f:
+#                 for chunk in response.iter_content(32768):
+#                     f.write(chunk)
 
-    model_data = joblib.load(destination)
-    return {
-        "model": model_data["model"],
-        "vectorizer": model_data["vectorizer"],
-        "label_encoder": model_data["label_encoder"]
-    }
+#     model_data = joblib.load(destination)
+#     return {
+#         "model": model_data["model"],
+#         "vectorizer": model_data["vectorizer"],
+#         "label_encoder": model_data["label_encoder"]
+#     }
 
-model_data = load_model()
+# model_data = load_model()
 import gdown
 import os
 import pickle
@@ -96,7 +96,28 @@ def load_image_model():
 
 
 svc_model = load_image_model()
+import faiss
+from sentence_transformers import SentenceTransformer
+import pickle
 
+# Add this initialization section after your other model loads
+@st.cache_resource
+def load_fastapi_components():
+    # Download FAISS index and data
+    faiss_url = "https://drive.google.com/uc?id=YOUR_FAISS_INDEX_ID"
+    data_url = "https://drive.google.com/uc?id=YOUR_RECIPE_DATA_ID"
+    
+    # Download files using gdown
+    faiss_path = gdown.download(faiss_url, "recipes_index.faiss", quiet=True)
+    data_path = gdown.download(data_url, "recipes_data.pkl", quiet=True)
+    
+    # Load components
+    index = faiss.read_index("recipes_index.faiss")
+    with open("recipes_data.pkl", "rb") as f:
+        rag_texts = pickle.load(f)
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    
+    return index, rag_texts, model
 # -------------------------------
 # 3. SESSION STATE
 # -------------------------------
@@ -374,36 +395,33 @@ with col_anim:
 with col_output:
     if st.session_state.generate_clicked:
         with st.spinner("Analyzing ingredients and generating recipes..."):
-            time.sleep(1.2)
             try:
-                X_input = model_data["vectorizer"].transform([st.session_state.ingredients]).toarray()
-                y_pred = model_data["model"].predict(X_input)
-                top3_indices = np.argsort(y_pred, axis=1)[0][-3:][::-1]
-                top3_recipes = model_data["label_encoder"].inverse_transform(top3_indices)
-                top3_scores = (y_pred[0][top3_indices] * 100).astype(int)
+                # Load components if not already loaded
+                if 'faiss_components' not in st.session_state:
+                    index, rag_texts, model = load_fastapi_components()
+                    st.session_state.faiss_components = (index, rag_texts, model)
+                else:
+                    index, rag_texts, model = st.session_state.faiss_components
 
-                st.markdown(f"""
-                <div style="margin-bottom: 1rem; text-align: center;">
-                    <h2 style="font-size: 1.8rem; color: var(--text);">✨ RECOMMENDED RECIPES ✨</h2>
-                    <p class="big-text">For: <strong>{st.session_state.ingredients}</strong></p>
-                </div>
-                """, unsafe_allow_html=True)
+                # Perform the FAISS search
+                q_embed = model.encode([ingredients], convert_to_numpy=True)
+                faiss.normalize_L2(q_embed)
+                scores, ids = index.search(q_embed, k=3)
 
-                for recipe_name, score in zip(top3_recipes, top3_scores):
-                    prep_time = np.random.randint(15, 60)
-                    card_html = f"""
-                    <div class="recipe-card">
-                        <h3>{recipe_name}</h3>
-                        <p class="big-text">🍳 <strong>{prep_time} minutes preparation</strong></p>
-                        <p class="big-text">⭐ <strong>{score}% ingredient match</strong></p>
-                        <div style="height: 20px; background: var(--primary);
-                                    width: {score}%; border-radius: 8px; margin: 1rem 0;"></div>
-                    </div>
-                    """
-                    st.markdown(card_html, unsafe_allow_html=True)
+                # Format results
+                results = []
+                for i, idx in enumerate(ids[0]):
+                    recipe = rag_texts[idx]
+                    match = round(scores[0][i] * 100, 2)
+                    results.append(f"✅ Match: {match}%\n\n{recipe}")
+
+                output = "\n\n\n".join(results)
+                
+                st.success("✅ Recipes generated:")
+                st.markdown(f"<pre style='background:#f9f9f9; padding:1rem'>{output}</pre>", unsafe_allow_html=True)
 
             except Exception as e:
-                st.error(f"Analysis error: {str(e)}", icon="❌")
+                st.error(f"❌ Error generating recipes: {e}")
     if uploaded_file is not None:
         try:
             with st.spinner("Analyzing image and identifying dish..."):
