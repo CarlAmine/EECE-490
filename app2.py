@@ -519,6 +519,28 @@ def format_ingredients(raw_ingredients):
 # -------------------------------
 # 3. MODEL LOADING (CACHED)
 # -------------------------------
+import faiss
+from sentence_transformers import SentenceTransformer
+import pickle
+
+# Add this initialization section after your other model loads
+@st.cache_resource
+def load_fastapi_components():
+    # Download FAISS index and data
+    faiss_url = "https://drive.google.com/uc?id=YOUR_FAISS_INDEX_ID"
+    data_url = "https://drive.google.com/uc?id=YOUR_RECIPE_DATA_ID"
+    
+    # Download files using gdown
+    faiss_path = gdown.download(faiss_url, "recipes_index.faiss", quiet=True)
+    data_path = gdown.download(data_url, "recipes_data.pkl", quiet=True)
+    
+    # Load components
+    index = faiss.read_index("recipes_index.faiss")
+    with open("recipes_data.pkl", "rb") as f:
+        rag_texts = pickle.load(f)
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    
+    return index, rag_texts, model
 @st.cache_resource
 def load_resources():
     # Load recipe data
@@ -616,21 +638,37 @@ with col2:
                     else:
                         st.warning("Recipe details not available")
             
-            # FastAPI Integration
-            st.subheader("🧑🍳 AI-Generated Recipe")
+            # Integrated FAISS-based AI Generation
+            st.subheader("🧑🍳 AI-Generated Recipe Matches")
             try:
-                response = requests.post(
-                    "http://localhost:8000/suggest",
-                    json={"ingredients": ingredients},
-                    timeout=10
-                )
-                if response.status_code == 200:
-                    st.markdown(f"""<div class="api-response">{response.json()["recipe"]}</div>""", 
-                              unsafe_allow_html=True)
+                # Lazy-load FAISS components
+                if 'faiss_components' not in st.session_state:
+                    with st.spinner("Loading AI recipe engine..."):
+                        index, rag_texts, encoder = load_fastapi_components()
+                        st.session_state.faiss_components = (index, rag_texts, encoder)
                 else:
-                    st.error("Failed to generate recipe. Please try again.")
+                    index, rag_texts, encoder = st.session_state.faiss_components
+
+                # Generate embeddings and search
+                q_embed = encoder.encode([ingredients], convert_to_numpy=True)
+                faiss.normalize_L2(q_embed)
+                scores, ids = index.search(q_embed, k=3)
+
+                # Display results
+                results = []
+                for i, idx in enumerate(ids[0]):
+                    recipe = rag_texts[idx]
+                    match_score = min(100, max(0, round(scores[0][i] * 100, 1)))
+                    results.append(f"""
+                    🎯 Match Confidence: {match_score}%
+                    {recipe}
+                    """)
+                
+                st.markdown(f"""<div class="api-response">{"<hr>".join(results)}</div>""", 
+                          unsafe_allow_html=True)
+
             except Exception as e:
-                st.error(f"API Connection Error: {str(e)}")
+                st.error(f"❌ AI Generation Error: {str(e)}")
 
     # Image Recognition Section
     if uploaded_file:
