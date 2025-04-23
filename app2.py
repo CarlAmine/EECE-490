@@ -48,18 +48,13 @@ import pickle
 import streamlit as st
 @st.cache_resource
 def load_image_model():
-    import gdown
-    import os
-    import pickle
+    url = https://github.com/CarlAmine/EECE-490/releases/download/v1.0/490Image.pkl
 
-    url = "https://drive.google.com/uc?export=download&id=1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX"
-    destination = "490Image.pkl"
+    response = requests.get(url)
+    with open("490Image.pkl", "wb") as f:
+        f.write(response.content)
 
-    # Redownload if file doesn't exist or is too small (corrupted)
-    if not os.path.exists(destination) or os.path.getsize(destination) < 1000:
-        gdown.download(url, destination, quiet=False,use_cookies = True)
-
-    with open(destination, "rb") as f:
+    with open("490Image.pkl", "rb") as f:
         model = pickle.load(f)
 
     return model
