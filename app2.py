@@ -104,8 +104,8 @@ import pickle
 @st.cache_resource
 def load_fastapi_components():
     # Download FAISS index and data
-    faiss_url = "https://drive.google.com/uc?id=YOUR_FAISS_INDEX_ID"
-    data_url = "https://drive.google.com/uc?id=YOUR_RECIPE_DATA_ID"
+    faiss_url = "https://drive.google.com/uc?id=1hyZ5OaqGT7pBRdY33oDFldldmozEfC0m"
+    data_url = "https://drive.google.com/uc?id=1lhzN-CF5SDXPQo0lHY_BcGz6hqhzDVEg"
     
     # Download files using gdown
     faiss_path = gdown.download(faiss_url, "recipes_index.faiss", quiet=True)
