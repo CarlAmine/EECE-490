@@ -18,7 +18,7 @@ app.add_middleware(
 )
 
 # 🔁 New model path
-MODEL_PATH = "C:/Users/AUB/Desktop/Project-490/models"
+MODEL_PATH = "https://drive.google.com/drive/folders/10okoRXmRZDGtsF8e5cDxSLEzJWfuF9nl"
 
 # Load FAISS and data
 print("📦 Loading index and data...")
