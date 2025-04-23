@@ -57,11 +57,11 @@ def load_image_model():
     # with open(destination, 'rb') as f:
     #     model = pickle.load(f)
     # return model
-    file_id = '1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX'
+    file_id2 = '1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX'
     destination = '490Image.pkl'
 
     if not os.path.exists(destination):
-        URL = f'https://drive.google.com/uc?id={file_id}'
+        URL = f'https://drive.google.com/uc?id={file_id2}'
         session = requests.Session()
         response = session.get(URL, stream=True)
         if 'Content-Disposition' in response.headers:
