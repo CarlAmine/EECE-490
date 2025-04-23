@@ -56,7 +56,7 @@ def load_image_model():
         gdown.download(url, destination, quiet=False)
 
     with open(destination, 'wb') as f:
-        model = pickle.load(f)
+        model = joblib.load(f)
     return model
 
 svc_model = load_image_model()
