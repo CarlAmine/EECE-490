@@ -32,7 +32,7 @@ def load_recipe_csv():
     if not os.path.exists(output):
         gdown.download(url, output, quiet=False)
 
-    df = np.load('raw_recipe.npy', allow_pickle=True).item()
+    df = np.load('raw_recipes.npy', allow_pickle=True).item()
     return df
 recipe_dict = load_recipe_csv()
 @st.cache_resource
