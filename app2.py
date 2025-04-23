@@ -330,7 +330,7 @@ with col_output:
             with st.spinner("Analyzing image and identifying dish..."):
                 img_array = preprocess_for_svc(uploaded_file.read())
                 prediction = svc_model.predict(img_array)
-                predicted_class = prediction[0]
+                predicted_class = prediction
     
                 st.markdown(f"""
                 <div class="recipe-card">
