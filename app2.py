@@ -48,16 +48,29 @@ import pickle
 import streamlit as st
 @st.cache_resource
 def load_image_model():
-    url = "https://drive.google.com/uc?id=1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX"
-    destination = "490Image.pkl"
+    # url = "https://drive.google.com/uc?id=1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX"
+    # destination = "490Image.pkl"
+
+    # if not os.path.exists(destination):
+    #     gdown.download(url, destination, quiet=False)
+
+    # with open(destination, 'rb') as f:
+    #     model = pickle.load(f)
+    # return model
+    file_id = '1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX'
+    destination = '490Image.pkl'
 
     if not os.path.exists(destination):
-        gdown.download(url, destination, quiet=False)
+        URL = f'https://drive.google.com/uc?id={file_id}'
+        session = requests.Session()
+        response = session.get(URL, stream=True)
+        if 'Content-Disposition' in response.headers:
+            with open(destination, 'wb') as f:
+                for chunk in response.iter_content(32768):
+                    f.write(chunk)
 
-    with open(destination, 'rb') as f:
-        model = pickle.load(f)
-    return model
-
+    model_data = pickle.load(destination)
+    return model_data
 svc_model = load_image_model()
 
 # -------------------------------
