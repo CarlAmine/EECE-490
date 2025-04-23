@@ -7,3 +7,4 @@ joblib
 requests
 gdown
 streamlit_lottie
+pickle
