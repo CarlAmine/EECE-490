@@ -401,7 +401,7 @@ with col_output:
                 if 'error' not in recipe_data:
                     # Format the components
                     ingredients = format_ingredients(recipe_data['ingredients'])
-                    steps = '\n'.join([step.strip("'") for step in recipe_data['steps']])
+                    steps = ' '.join([step.strip("'") for step in recipe_data['steps']])
                     nutrition = format_nutrition(recipe_data['nutrition'])
                     
                     # Display recipe details
