@@ -305,21 +305,21 @@ with col_output:
             except Exception as e:
                 st.error(f"Analysis error: {str(e)}", icon="❌")
     if uploaded_file is not None:
-    try:
-        with st.spinner("Analyzing image and identifying dish..."):
-            img_array = preprocess_for_svc(uploaded_file.read())
-            prediction = svc_model.predict(img_array)
-            predicted_class = prediction[0]
-
-            st.markdown(f"""
-            <div class="recipe-card">
-                <h3>📷 Dish Identified from Image</h3>
-                <p class="big-text">🍽️ <strong>{predicted_class}</strong></p>
-            </div>
-            """, unsafe_allow_html=True)
-
-    except Exception as e:
-        st.error(f"Image prediction error: {str(e)}", icon="🛑")
+        try:
+            with st.spinner("Analyzing image and identifying dish..."):
+                img_array = preprocess_for_svc(uploaded_file.read())
+                prediction = svc_model.predict(img_array)
+                predicted_class = prediction[0]
+    
+                st.markdown(f"""
+                <div class="recipe-card">
+                    <h3>📷 Dish Identified from Image</h3>
+                    <p class="big-text">🍽️ <strong>{predicted_class}</strong></p>
+                </div>
+                """, unsafe_allow_html=True)
+    
+        except Exception as e:
+            st.error(f"Image prediction error: {str(e)}", icon="🛑")
 # -------------------------------
 # 9. SUPPRESS TENSORFLOW WARNINGS
 # -------------------------------
