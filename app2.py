@@ -223,7 +223,26 @@ def preprocess_for_svc(image_bytes):
     img_array = np.array(img) / 255.0  # normalize if you trained this way
     flat_array = img_array.flatten().reshape(1, -1)  # make it 1D per image
     return flat_array
-
+def get_recipe_attributes(name):
+    target = name.lower()  # Case-insensitive search
+    # Get indices of rows where 'name' column contains the target substring
+    matching_indices = [
+        index 
+        for index, recipe_name in recipe_dict['name'].items() 
+        if target in recipe_name.lower()
+    ]
+    
+    if not matching_indices:
+        return {"error": "No recipe found with that name"}
+    
+    first_match_index = matching_indices[0]
+    
+    return {
+        'minutes': recipe_dict['minutes'][first_match_index],
+        'ingredients': recipe_dict['ingredients'][first_match_index],
+        'steps': recipe_dict['steps'][first_match_index],
+        'nutrition': recipe_dict['nutrition'][first_match_index]
+    }
 def load_lottie_file(filename):
     path = os.path.join(r"C:\Users\AUB\Documents\GitHub\EECE-490", filename)
     if os.path.exists(path):
@@ -340,22 +359,42 @@ with col_output:
 
             except Exception as e:
                 st.error(f"Analysis error: {str(e)}", icon="❌")
-    if uploaded_file is not None:
-        try:
-            with st.spinner("Analyzing image and identifying dish..."):
-                img_array = preprocess_for_svc(uploaded_file.read())
-                prediction = svc_model.predict(img_array)
-                predicted_class = category_dict[prediction[0]]
-                predicted_class = predicted_class.replace('_',' ')
+   if uploaded_file is not None:
+    try:
+        with st.spinner("Analyzing image and identifying dish..."):
+            img_array = preprocess_for_svc(uploaded_file.read())
+            prediction = svc_model.predict(img_array)
+            predicted_class = category_dict[prediction[0]]
+            predicted_class = predicted_class.replace('_',' ')
+            
+            # Display prediction
+            st.markdown(f"""
+            <div class="recipe-card">
+                <h3>📷 Dish Identified from Image</h3>
+                <p class="big-text">🍽️ <strong>{predicted_class}</strong></p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Get recipe attributes using the predicted class
+            recipe_data = get_recipe_attributes(predicted_class)
+            
+            # Check if recipe found
+            if 'error' not in recipe_data:
+                # Display recipe details in a card format
                 st.markdown(f"""
                 <div class="recipe-card">
-                    <h3>📷 Dish Identified from Image</h3>
-                    <p class="big-text">🍽️ <strong>{predicted_class}</strong></p>
+                    <h3>📝 Recipe Details</h3>
+                    <p>⏱ Cooking Time: <strong>{recipe_data['minutes']} minutes</strong></p>
+                    <p>🥕 Ingredients: <strong>{', '.join(recipe_data['ingredients'])}</strong></p>
+                    <p>👩🍳 Steps: <strong>{recipe_data['steps']}</strong></p>
+                    <p>📊 Nutrition: <strong>{recipe_data['nutrition']}</strong></p>
                 </div>
                 """, unsafe_allow_html=True)
-    
-        except Exception as e:
-            st.error(f"Image prediction error: {str(e)}", icon="🛑")
+            else:
+                st.warning(f"No recipe found for {predicted_class}", icon="⚠️")
+
+    except Exception as e:
+        st.error(f"Error: {str(e)}", icon="🛑")
 # -------------------------------
 # 9. SUPPRESS TENSORFLOW WARNINGS
 # -------------------------------
