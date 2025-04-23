@@ -392,7 +392,7 @@ with col_output:
                 recipe_data = get_recipe_attributes(predicted_class)
                 
                 # Check if recipe found
-               if 'error' not in recipe_data:
+                if 'error' not in recipe_data:
                     # Format the components
                     ingredients = ', '.join([ing.strip("' ") for ing in recipe_data['ingredients'] if ing.strip("' ")])
                     steps = '\n'.join([step.strip("'") for step in recipe_data['steps']])
