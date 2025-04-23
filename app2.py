@@ -57,20 +57,12 @@ def load_image_model():
     # with open(destination, 'rb') as f:
     #     model = pickle.load(f)
     # return model
-    file_id2 = '1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX'
-    destination = '490Image.pkl'
-
-    if not os.path.exists(destination):
-        URL = f'https://drive.google.com/uc?id={file_id2}'
-        session = requests.Session()
-        response = session.get(URL, stream=True)
-        if 'Content-Disposition' in response.headers:
-            with open(destination, 'wb') as f:
-                for chunk in response.iter_content(32768):
-                    f.write(chunk)
-
-    model_data = pickle.load(destination)
-    return model_data
+    url = "https://drive.google.com/uc?id=1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX"
+    gdown.download(url, "test.pkl", quiet=False)
+    
+    with open("test.pkl", "rb") as f:
+        model = pickle.load(f)
+        return model # Should work if file is valid
 svc_model = load_image_model()
 
 # -------------------------------
