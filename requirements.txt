@@ -3,7 +3,8 @@ uvicorn[standard]
 faiss-cpu
 sentence-transformers
 openai>=1.0.0
-tensorflow
+tensorflow==2.11.0
+keras==2.11.0
 streamlit
 scikit-learn
 numpy
@@ -12,4 +13,3 @@ joblib
 requests
 gdown
 streamlit_lottie
-
