@@ -44,7 +44,7 @@ def load_model():
 model_data = load_model()
 @st.cache_resource
 def load_image_model():
-    file_id = '1T5FgG8WzyciW8KVD0NN3k9FWS5ttyH4_'  # <-- update this
+    file_id = '1kyATzxBuLP5nWScPpwT9KrkkIuxY22vX'  # <-- update this 
     destination = '490Image.pkl'
 
     if not os.path.exists(destination):
