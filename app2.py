@@ -204,7 +204,7 @@ import io
 
 def preprocess_for_svc(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    img = img.resize((150, 150))  # <-- use the size from your training
+    img = img.resize((15, 15, 3))  # <-- use the size from your training
     img_array = np.array(img) / 255.0  # normalize if you trained this way
     flat_array = img_array.flatten().reshape(1, -1)  # make it 1D per image
     return flat_array
