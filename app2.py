@@ -359,7 +359,7 @@ with col_output:
 
             except Exception as e:
                 st.error(f"Analysis error: {str(e)}", icon="❌")
-   if uploaded_file is not None:
+    if uploaded_file is not None:
         try:
             with st.spinner("Analyzing image and identifying dish..."):
                 img_array = preprocess_for_svc(uploaded_file.read())
