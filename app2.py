@@ -256,6 +256,12 @@ def get_recipe_attributes(name):
         'steps': recipe_dict['steps'][first_match_index],
         'nutrition': recipe_dict['nutrition'][first_match_index]
     }
+# Helper function to format ingredients
+def format_ingredients(raw_ingredients):
+    # Join all characters into a single string
+    ingredients_str = ''.join(raw_ingredients)
+    # Split into individual ingredients using commas
+    return [ing.strip(" '\"") for ing in ingredients_str.split(',') if ing.strip()]
 def load_lottie_file(filename):
     path = os.path.join(r"C:\Users\AUB\Documents\GitHub\EECE-490", filename)
     if os.path.exists(path):
@@ -394,7 +400,7 @@ with col_output:
                 # Check if recipe found
                 if 'error' not in recipe_data:
                     # Format the components
-                    ingredients = ', '.join([ing.strip("' ") for ing in recipe_data['ingredients'] if ing.strip("' ")])
+                    ingredients = format_ingredients(recipe_data['ingredients'])
                     steps = '\n'.join([step.strip("'") for step in recipe_data['steps']])
                     nutrition = format_nutrition(recipe_data['nutrition'])
                     
