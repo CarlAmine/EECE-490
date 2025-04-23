@@ -48,7 +48,7 @@ import pickle
 import streamlit as st
 @st.cache_resource
 def load_image_model():
-    url = "https://github.com/CarlAmine/EECE-490/releases/download/v1.0/490Image.pkl"
+    url = "https://github.com/CarlAmine/EECE-490/releases/download/v1.0"
     destination = "490Image.pkl"
     expected_size = 687 * 1024 * 1024  # 687 MB in bytes
 
