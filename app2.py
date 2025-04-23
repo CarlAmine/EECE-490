@@ -7,15 +7,7 @@ import time
 import streamlit as st
 from streamlit_lottie import st_lottie
 import pickle
-import kagglehub
-
-# Download latest version
-path = kagglehub.dataset_download("synysterjeet/food-classification")
-
-print("Path to dataset files:", path)
-input_dir = r'C:\Users\carla\.cache\kagglehub\datasets\synysterjeet\food-classification\versions\6/dataset/train'
-categories = sorted(os.listdir(input_dir))  # sort to ensure consistent order
-category_dict = {idx: category for idx, category in enumerate(categories)}
+category_dict = np.load('category_dict.npy', allow_pickle=True).item()
 
 # -------------------------------
 # 1. PAGE CONFIGURATION
