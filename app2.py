@@ -223,6 +223,19 @@ def preprocess_for_svc(image_bytes):
     img_array = np.array(img) / 255.0  # normalize if you trained this way
     flat_array = img_array.flatten().reshape(1, -1)  # make it 1D per image
     return flat_array
+def format_nutrition(nutrition_list):
+    if len(nutrition_list) == 7:
+        # Skip the 6th element (index 5) if length is 7
+        labels = ['Calories', 'total fat', 'total sugar', 
+                 'sodium', 'protein', 'saturated fat']
+        indices = [0, 1, 2, 3, 4, 6]
+    else:
+        labels = ['Calories', 'total fat', 'total sugar',
+                 'sodium', 'protein', 'saturated fat']
+        indices = range(len(labels))
+    
+    return '\n'.join([f'{nutrition_list[i]} {labels[idx]}' 
+                    for idx, i in enumerate(indices) if i < len(nutrition_list)])
 def get_recipe_attributes(name):
     target = name.lower()  # Case-insensitive search
     # Get indices of rows where 'name' column contains the target substring
@@ -379,15 +392,20 @@ with col_output:
                 recipe_data = get_recipe_attributes(predicted_class)
                 
                 # Check if recipe found
-                if 'error' not in recipe_data:
-                    # Display recipe details in a card format
+               if 'error' not in recipe_data:
+                    # Format the components
+                    ingredients = ', '.join([ing.strip("' ") for ing in recipe_data['ingredients'] if ing.strip("' ")])
+                    steps = '\n'.join([step.strip("'") for step in recipe_data['steps']])
+                    nutrition = format_nutrition(recipe_data['nutrition'])
+                    
+                    # Display recipe details
                     st.markdown(f"""
                     <div class="recipe-card">
                         <h3>📝 Recipe Details</h3>
                         <p>⏱ Cooking Time: <strong>{recipe_data['minutes']} minutes</strong></p>
-                        <p>🥕 Ingredients: <strong>{', '.join(recipe_data['ingredients'])}</strong></p>
-                        <p>👩🍳 Steps: <strong>{recipe_data['steps']}</strong></p>
-                        <p>📊 Nutrition: <strong>{recipe_data['nutrition']}</strong></p>
+                        <p>🥕 Ingredients: <strong>{ingredients}</strong></p>
+                        <pre>👩🍳 Steps:\n{steps}</pre>
+                        <pre>📊 Nutrition:\n{nutrition}</pre>
                     </div>
                     """, unsafe_allow_html=True)
                 else:
