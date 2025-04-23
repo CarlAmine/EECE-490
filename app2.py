@@ -7,6 +7,13 @@ import time
 import streamlit as st
 from streamlit_lottie import st_lottie
 import pickle
+from fastapi import FastAPI
+from pydantic import BaseModel
+import faiss
+import pickle
+import numpy as np
+from sentence_transformers import SentenceTransformer
+from fastapi.middleware.cors import CORSMiddleware
 category_dict = np.load('category_dict.npy', allow_pickle=True).item()
 
 # -------------------------------
