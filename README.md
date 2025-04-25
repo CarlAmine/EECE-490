@@ -12,3 +12,6 @@ In the main branch:
 
 
 This project consists of two main models, one tailored to identify recipes from ingredient input and the other trained to identify recipes from simple photos.
+
+Link to Google Drive(FAISS,recipe.pkl): https://drive.google.com/drive/folders/10okoRXmRZDGtsF8e5cDxSLEzJWfuF9nl?usp=sharing
+Link to Google Drive(Image-model.pkl):https://drive.google.com/drive/folders/10okoRXmRZDGtsF8e5cDxSLEzJWfuF9nl?usp=sharing
